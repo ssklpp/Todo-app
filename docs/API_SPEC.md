@@ -6,6 +6,8 @@
 ## 1. 개요
 
 - API는 v0.2부터 쓴다. v0.1은 서버 없이 화면 안에서만 동작한다.
+- API 서버는 FastAPI로 만든다. 개발할 때 주소는 `http://localhost:8000`이다. 화면은 `NEXT_PUBLIC_API_URL`에서 이 주소를 읽는다. (TRD 4절)
+- FastAPI는 `http://localhost:3000`(화면)의 요청만 허용한다(CORS).
 - 모든 요청과 응답 본문은 JSON이다.
 - 요청에 본문이 있으면 헤더에 `Content-Type: application/json`을 넣는다.
 - 할 일 하나의 모양은 `DATA_MODEL.md` 4절의 `Todo` 타입과 같다.
@@ -56,6 +58,17 @@
 | `INTERNAL_ERROR` | 500 | 서버나 DB에서 예상하지 못한 문제가 생겼을 때 |
 
 - 500 에러의 `message`에는 DB 오류 내용 같은 내부 정보를 넣지 않는다.
+
+### FastAPI 기본 에러와 다른 점
+
+FastAPI는 검사에 실패하면 기본으로 422 상태 코드와 `{ "detail": [...] }` 모양을 보낸다. 이 명세는 400과 위의 `error` 모양을 쓴다. 그래서 `backend/app/main.py`에 에러 변환 함수(exception handler)를 둔다.
+
+| FastAPI 기본 에러 | 바꿀 응답 |
+| --- | --- |
+| 본문 JSON 읽기 실패 (`RequestValidationError`, type `json_invalid`) | 400 `INVALID_JSON` |
+| 경로 `{id}`가 uuid가 아님 (`RequestValidationError`, 위치 `path`) | 400 `INVALID_ID` |
+| 그 밖의 본문 검사 실패 (`RequestValidationError`, 위치 `body`) | 400 `VALIDATION_ERROR` |
+| 처리하지 못한 예외 (`Exception`) | 500 `INTERNAL_ERROR` |
 
 ### 상태 코드 설명
 
@@ -197,6 +210,6 @@
 ## 4. 확인이 필요한 사항
 
 - **공백만 있는 제목:** PRD 7절 미결 사항이다. `"   "`를 `VALIDATION_ERROR`로 볼지 정해야 한다.
-- **글자 수 세는 방법:** DATA_MODEL 5절 미결 사항이다. 이모지가 들어간 제목의 100자 판단 기준을 정해야 한다.
+- **글자 수 세는 방법:** DATA_MODEL 6절 미결 사항이다. 이모지가 들어간 제목의 100자 판단 기준을 정해야 한다.
 - **모르는 필드:** 요청에 `title`, `completed` 말고 다른 필드가 오면 무시할지, `VALIDATION_ERROR`로 볼지 정해야 한다.
 - **이미 삭제된 할 일 삭제:** 지금은 404로 정했다. 결과가 같으니 204로 볼 수도 있다.

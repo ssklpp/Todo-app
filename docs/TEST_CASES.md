@@ -5,8 +5,10 @@
 
 ## 1. 개요
 
-- 테스트 도구: Jest, React Testing Library (TRD 7절)
-- 실행 명령: `npm test`
+- 테스트 도구 (TRD 7절)
+  - API 테스트: pytest + FastAPI `TestClient`. 파일은 `backend/tests/`에 둔다.
+  - 컴포넌트 테스트: Jest + React Testing Library
+- 실행 명령: API는 `backend/`에서 `pytest`, 화면은 `npm test`
 - ID 규칙
   - API 테스트: `T-API-01`, `T-API-02`, ...
   - 컴포넌트 테스트: `T-UI-01`, `T-UI-02`, ...
@@ -17,7 +19,8 @@
 
 - 대상 버전: v0.2 이후 (v0.1에는 API가 없다)
 - 모든 에러 테스트는 응답 본문이 `{ "error": { "code": "...", "message": "..." } }` 모양인지도 함께 확인한다.
-- "저장소 오류"는 저장 함수(`src/lib/`)가 실패하도록 만든 상황이다.
+- "저장소 오류"는 저장 함수(`backend/app/store.py`)가 실패하도록 만든 상황이다. (pytest `monkeypatch`로 예외를 일으킨다)
+- `TestClient`는 처리하지 못한 예외를 기본으로 테스트 밖으로 던진다. 500 테스트에서는 `TestClient(app, raise_server_exceptions=False)`로 만든다.
 
 ### 2.1 `GET /api/todos` - 목록 읽기
 
@@ -171,7 +174,7 @@
 | 상황 | 미정인 이유 | 출처 |
 | --- | --- | --- |
 | 제목이 공백만 있다 (`"   "`) | 빈 제목으로 볼지 정하지 않았다 | PRD 7절 |
-| 제목에 이모지가 들어 있다 | 100자를 어떻게 셀지 정하지 않았다 | DATA_MODEL 5절 |
+| 제목에 이모지가 들어 있다 | 100자를 어떻게 셀지 정하지 않았다 | DATA_MODEL 6절 |
 | `POST`에 `id`나 `completed`를 함께 보낸다 | 모르는 필드를 무시할지 정하지 않았다 | API_SPEC 4절 |
 | `PATCH`에 `title`을 함께 보낸다 | 위와 같다 | API_SPEC 4절 |
 | `id`도 틀리고 본문도 틀리다 | 어느 에러를 먼저 보낼지 정하지 않았다 | API_SPEC 검토 |
